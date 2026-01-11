@@ -25,7 +25,7 @@ app.use(static)
 
 //Index Route
 app.get("/", function(req, res) {
-  res.render("index", {title: "Andrea"})
+  res.render("index", {title: "CSE Motors"})
 })
 
 /* ***********************
