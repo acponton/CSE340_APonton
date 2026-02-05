@@ -238,7 +238,19 @@ box-shadow: 0 0 10px rgba(0,0,0,0.15);
   font-weight: 600;
 }
 
+.password-requirements {
+  font-size: .9rem;
+  margin-bottom: .5rem;
+  color: #333;
+}
 
+.notice {
+  background: #ffe6e6;
+  border-left: 4px solid #cc0000;
+  padding: .75rem 1rem;
+  margin-bottom: 1rem;
+  list-style: disc inside;
+}
 
 /* ==========================================
 Desktop Styles
