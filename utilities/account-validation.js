@@ -1,6 +1,7 @@
 const utilities = require(".")
 const { body, validationResult } = require("express-validator")
 const validate = {}
+const accountModel = require("../models/account-model")
 
 /*  **********************************
   *  Registration Data Validation Rules
@@ -23,14 +24,18 @@ validate.registationRules = () => {
             .isLength({ min: 2 })
             .withMessage("Please provide a last name."),
 
-        // valid email is required
+        // valid email is required and cannot already exist in the database
         body("account_email")
             .trim()
-            .escape()
-            .notEmpty()
             .isEmail()
-            .normalizeEmail()
-            .withMessage("A valid email is required."),
+            .normalizeEmail() // refer to validator.js docs
+            .withMessage("A valid email is required.")
+            .custom(async (account_email) => {
+                const emailExists = await accountModel.checkExistingEmail(account_email)
+                if (emailExists){
+                    throw new Error("Email exists. Please log in or use different email")
+                }
+            }),
 
         // password is required and must be strong
         body("account_password")
@@ -44,6 +49,26 @@ validate.registationRules = () => {
             minSymbols: 1,
         })
         .withMessage("Password does not meet requirements."),
+    ]
+}
+
+/* **********************************
+ *  Login Data Validation Rules
+ * ********************************* */
+validate.loginRules = () => {
+    return [
+        // email is required and must be valid
+        body("account_email")
+            .trim()
+            .isEmail()
+            .normalizeEmail()
+            .withMessage("A valid email is required."),
+
+        // password is required and must meet the same strength pattern
+        body("account_password")
+            .trim()
+            .notEmpty()
+            .withMessage("Password is required.")
     ]
 }
 
@@ -63,6 +88,26 @@ validate.checkRegData = async (req, res, next) => {
             account_firstname,
             account_lastname,
             account_email,
+        })
+        return
+    }
+    next()
+}
+
+/* ******************************
+ * Check login data and return errors or continue
+ * ***************************** */
+validate.checkLoginData = async (req, res, next) => {
+    const { account_email } = req.body
+    let errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+        let nav = await utilities.getNav()
+        res.render("account/login", {
+            title: "Login",
+            nav,
+            errors,
+            account_email
         })
         return
     }
