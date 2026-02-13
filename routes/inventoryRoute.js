@@ -14,7 +14,7 @@ router.get("/type/:classificationId", utilities.handleErrors(invController.build
 // Route to build a specific vehicle detail view
 router.get("/detail/:inv_id", utilities.handleErrors(invController.buildDetailView))
 
-// ⭐ Intentional 500 error route
+// Intentional 500 error route
 router.get("/trigger-error", utilities.handleErrors(invController.triggerError)
 )
 
@@ -39,6 +39,23 @@ router.post("/add-inventory",
     invValidate.inventoryRules(),
     invValidate.checkInventoryData,
     utilities.handleErrors(invController.addInventory)
+)
+
+// Return inventory JSON for management view
+router.get("/getInventory/:classification_id", utilities.handleErrors(invController.getInventoryJSON))
+
+// Deliver edit inventory view
+router.get(
+  "/edit/:inv_id",
+  utilities.handleErrors(invController.editInventoryView)
+)
+
+// Process inventory update
+router.post(
+    "/update",
+    invValidate.inventoryRules(),
+    invValidate.checkUpdateData,
+    utilities.handleErrors(invController.updateInventory)
 )
 
 module.exports = router;
