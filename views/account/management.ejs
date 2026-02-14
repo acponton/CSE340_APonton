@@ -19,3 +19,10 @@
     </p>
 
 <% } %>
+
+<% if (locals.accountData.account_type === "Admin") { %>
+    <h3>Admin Tools</h3>
+    <p>
+        <a href="/admin/dashboard">Admin Dashboard</a>
+    </p>
+<% } %>

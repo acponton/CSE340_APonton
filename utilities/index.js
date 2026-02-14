@@ -182,4 +182,12 @@ utilities.checkLogin = (req, res, next) => {
     }
 }
 
+utilities.checkAdmin = (req, res, next) => {
+    if (res.locals.accountData && res.locals.accountData.account_type === "Admin") {
+        return next()
+    }
+    req.flash("notice", "You do not have permission to access that page.")
+    return res.redirect("/account/")
+}
+
 module.exports = utilities

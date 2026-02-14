@@ -1,0 +1,35 @@
+<%- include('../partials/header') %>
+
+<h1>Admin Dashboard</h1>
+
+<section class="dashboard-grid">
+
+    <div class="card">
+        <h2>Total Accounts</h2>
+        <p><%= accountCount %></p>
+    </div>
+
+    <div class="card">
+        <h2>Total Vehicles</h2>
+        <p><%= inventoryCount %></p>
+    </div>
+
+    <div class="card">
+        <h2>Total Classifications</h2>
+        <p><%= classificationCount %></p>
+    </div>
+
+    <div class="card">
+        <h2>Most Expensive Vehicle</h2>
+        <p><%= mostExpensive.inv_make %> <%= mostExpensive.inv_model %></p>
+        <p>$<%= mostExpensive.inv_price.toLocaleString() %></p>
+    </div>
+
+    <div class="card">
+        <h2>Most Common Classification</h2>
+        <p><%= mostCommon.classification_name %> (<%= mostCommon.count %>)</p>
+    </div>
+
+</section>
+
+<%- include('../partials/footer') %>
