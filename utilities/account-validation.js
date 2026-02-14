@@ -42,13 +42,13 @@ validate.registationRules = () => {
             .trim()
             .notEmpty()
             .isStrongPassword({
-            minLength: 12,
-            minLowercase: 1,
-            minUppercase: 1,
-            minNumbers: 1,
-            minSymbols: 1,
-        })
-        .withMessage("Password does not meet requirements."),
+                minLength: 12,
+                minLowercase: 1,
+                minUppercase: 1,
+                minNumbers: 1,
+                minSymbols: 1,
+            })
+            .withMessage("Password does not meet requirements."),
     ]
 }
 
@@ -78,7 +78,7 @@ validate.loginRules = () => {
 validate.checkRegData = async (req, res, next) => {
     const { account_firstname, account_lastname, account_email } = req.body
     let errors = []
-    errors = validationResult(req)
+    
     if (!errors.isEmpty()) {
         let nav = await utilities.getNav()
         res.render("account/register", {
@@ -89,7 +89,6 @@ validate.checkRegData = async (req, res, next) => {
             account_lastname,
             account_email,
         })
-        return
     }
     next()
 }
@@ -109,7 +108,103 @@ validate.checkLoginData = async (req, res, next) => {
             errors,
             account_email
         })
-        return
+    }
+    next()
+}
+
+/* **********************************
+ *  Update Account Validation Rules
+ ************************************ */
+validate.updateAccountRules = () => {
+    return [
+        body("account_firstname")
+            .trim()
+            .escape()
+            .notEmpty()
+            .withMessage("First name is required."),
+
+        body("account_lastname")
+            .trim()
+            .escape()
+            .notEmpty()
+            .withMessage("Last name is required."),
+
+        body("account_email")
+            .trim()
+            .isEmail()
+            .normalizeEmail()
+            .withMessage("A valid email is required.")
+            .custom(async (email, { req }) => {
+                const account_id = req.body.account_id
+                const existingEmail = await accountModel.checkExistingEmail(email)
+
+                // If email exists AND belongs to a different account → reject
+                if (existingEmail && existingEmail.account_id != account_id) {
+                    throw new Error("Email already exists. Please use a different email.")
+                }
+            })
+    ]
+}
+
+/* **********************************
+ *  Check Update Account Data
+ ************************************ */
+validate.checkUpdateAccountData = async (req, res, next) => {
+    const errors = validationResult(req)
+    const { account_firstname, account_lastname, account_email, account_id } = req.body
+
+    if (!errors.isEmpty()) {
+        let nav = await utilities.getNav()
+        const accountData = await accountModel.getAccountById(account_id)
+
+        return res.render("account/update-account", {
+            title: "Update Account Information",
+            nav,
+            errors,
+            accountData,
+            account_firstname,
+            account_lastname,
+            account_email
+        })
+    }
+    next()
+}
+
+/* **********************************
+ *  Password Update Validation Rules
+ ************************************ */
+validate.updatePasswordRules = () => {
+    return [
+        body("account_password")
+            .trim()
+            .isStrongPassword({
+                minLength: 12,
+                minLowercase: 1,
+                minUppercase: 1,
+                minNumbers: 1,
+                minSymbols: 1,
+            })
+            .withMessage("Password does not meet requirements.")
+    ]
+}
+
+/* **********************************
+ *  Check Password Update Data
+ ************************************ */
+validate.checkUpdatePasswordData = async (req, res, next) => {
+    const errors = validationResult(req)
+    const { account_id } = req.body
+
+    if (!errors.isEmpty()) {
+        let nav = await utilities.getNav()
+        const accountData = await accountModel.getAccountById(account_id)
+
+        return res.render("account/update-account", {
+            title: "Update Account Information",
+            nav,
+            errors,
+            accountData
+        })
     }
     next()
 }

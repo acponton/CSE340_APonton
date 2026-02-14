@@ -1,12 +1,29 @@
 const invModel = require("../models/inventory-model")
-const Util = {}
 const jwt = require("jsonwebtoken")
 require("dotenv").config()
+
+const utilities = {}
+
+/* ****************************************
+ *  Check account type for inventory access
+ * **************************************** */
+utilities.checkEmployeeOrAdmin = (req, res, next) => {
+    if (res.locals.loggedin) {
+        const type = res.locals.accountData.account_type
+
+        if (type === "Employee" || type === "Admin") {
+            return next()
+        }
+    }
+
+    req.flash("notice", "You must be logged in with proper permissions to access this page.")
+    return res.redirect("/account/login")
+}
 
 /* ************************
  * Constructs the nav HTML unordered list
  ************************** */
-Util.getNav = async function (req, res, next) {
+utilities.getNav = async function (req, res, next) {
     let data = await invModel.getClassifications()
     let list = "<ul>"
     list += '<li><a href="/" title="Home page">Home</a></li>'
@@ -30,7 +47,7 @@ Util.getNav = async function (req, res, next) {
 /* **************************************
 * Build the classification view HTML
 * ************************************ */
-Util.buildClassificationGrid = async function(data){
+utilities.buildClassificationGrid = async function(data){
     let grid
     if(data.length > 0){
         grid = '<ul id="inv-display">'
@@ -63,7 +80,7 @@ Util.buildClassificationGrid = async function(data){
 /* **************************************
  * Build the vehicle detail view HTML
  * ************************************ */
-Util.buildDetailHTML = function (vehicle) {
+utilities.buildDetailHTML = function (vehicle) {
     // Format price as USD
     const price = vehicle.inv_price.toLocaleString("en-US", {
         style: "currency",
@@ -101,12 +118,12 @@ Util.buildDetailHTML = function (vehicle) {
  * Wrap other function in this for 
  * General Error Handling
  **************************************** */
-Util.handleErrors = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next)
+utilities.handleErrors = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next)
 
 /* **************************************
  * Build the classification select list
  * ************************************ */
-Util.buildClassificationList = async function (classification_id = null) {
+utilities.buildClassificationList = async function (classification_id = null) {
     let data = await invModel.getClassifications()
     let classificationList =
         '<select name="classification_id" id="classificationList" required>'
@@ -133,7 +150,7 @@ Util.buildClassificationList = async function (classification_id = null) {
 /* ****************************************
 * Middleware to check token validity
 **************************************** */
-Util.checkJWTToken = (req, res, next) => {
+utilities.checkJWTToken = (req, res, next) => {
     if (req.cookies.jwt) {
         jwt.verify(
             req.cookies.jwt,
@@ -156,13 +173,13 @@ Util.checkJWTToken = (req, res, next) => {
 /* ****************************************
  *  Check Login
  * ************************************ */
-Util.checkLogin = (req, res, next) => {
+utilities.checkLogin = (req, res, next) => {
     if (res.locals.loggedin) {
         next()
     }   else {
         req.flash("notice", "Please log in.")
         return res.redirect("/account/login")
     }
- }
+}
 
-module.exports = Util
+module.exports = utilities
